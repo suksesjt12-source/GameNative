@@ -56,7 +56,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.gamenative"
+        applicationId = "app.ludashi.mobile"
 
         minSdk = 26
 
@@ -64,8 +64,8 @@ android {
         buildConfigField("boolean", "XR_BUILD", "false")
         buildConfigField("boolean", "MODERN_XR", "false")
 
-        versionCode = 24
-        versionName = "1.4.0"
+        versionCode = 26
+        versionName = "1.6.0-ludashi"
 
         buildConfigField("boolean", "GOLD", "false")
         fun secret(name: String) =

@@ -17,9 +17,37 @@ object DeviceGate {
         MODEL_RETROID_POCKET_NOVA,
     )
 
-    fun isDeviceSupported(model: String = Build.MODEL ?: ""): Boolean {
+    /**
+     * MediaTek MT6789-family devices include Helio G99/G100 variants.
+     * This is a conservative capability gate only; it does not write CPU/GPU clocks,
+     * disable thermal protections, or assume that every vendor kernel exposes the same nodes.
+     */
+    fun isMediaTekG99G100(
+        socModel: String = runCatching { Build.SOC_MODEL }.getOrDefault(""),
+        hardware: String = Build.HARDWARE ?: "",
+        board: String = Build.BOARD ?: "",
+    ): Boolean {
+        val fingerprint = normalize("$socModel $hardware $board")
+        return fingerprint.contains("mt6789") ||
+            fingerprint.contains("mt6789v") ||
+            fingerprint.contains("mt6789z")
+    }
+
+    /**
+     * True only for models whose CPU power-control presets have been measured.
+     * G99/G100 detection alone is not proof that this kernel exposes safe writable controls.
+     */
+    fun isPowerControlPresetValidated(model: String = Build.MODEL ?: ""): Boolean {
         val normalized = normalize(model)
         return testedModels.any { normalized.contains(it) }
+    }
+
+    /**
+     * Devices eligible for software frame pacing. This is deliberately broader than
+     * [isPowerControlPresetValidated] because software pacing does not imply clock access.
+     */
+    fun isDeviceSupported(model: String = Build.MODEL ?: ""): Boolean {
+        return isPowerControlPresetValidated(model) || isMediaTekG99G100()
     }
 
     fun normalizedModel(model: String = Build.MODEL ?: ""): String {
